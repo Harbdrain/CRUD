@@ -1,13 +1,12 @@
 package com.danil.crud;
 
-/**
- * Hello world!
- *
- */
+import com.danil.crud.view.LabelView;
+
 public class App 
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
+        LabelView labelView = new LabelView();
+        labelView.view();
     }
 }
