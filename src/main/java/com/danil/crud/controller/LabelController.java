@@ -10,12 +10,12 @@ import com.danil.crud.repository.LabelRepository;
 public class LabelController {
     LabelRepository repository = new GsonLabelRepositoryImpl("db/labels.json");
 
-    public void save(int id, String content) {
-        repository.save(new Label(id, content));
+    public void save(String content) {
+        repository.save(new Label(repository.getMaxId(), content));
     }
 
     public List<Label> getAll() {
-        return new ArrayList<Label>(repository.getAll().values());
+        return new ArrayList<Label>(repository.getAllExceptDeleted().values());
     }
 
     public void update(int id, String content) {

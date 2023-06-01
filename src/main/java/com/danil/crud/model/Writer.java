@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Writer {
-    private static int maxID;
     private final int id;
     private String firstName;
     private String lastName;
     List<Post> posts;
     WriterStatus status;
 
-    public Writer(String firstName, String lastName) {
-        this.id = maxID++;
+    public Writer(int id, String firstName, String lastName) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         posts = new ArrayList<>();
@@ -51,5 +50,21 @@ public class Writer {
         posts.add(post);
     }
 
-    // TODO: addPost(Post, List<Label>) ?
+    public WriterStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(WriterStatus status) {
+        this.status = status;
+    }
+
+    public void delete() {
+        this.status = WriterStatus.DELETED;
+    }
+
+    @Override
+    public String toString() {
+        return "Writer{id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", posts=" + posts
+                + ", status=" + status + "}";
+    }
 }

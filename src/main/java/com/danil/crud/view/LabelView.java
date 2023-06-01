@@ -15,8 +15,10 @@ public class LabelView {
     public void view() {
         showHelp();
         while (true) {
+            System.out.println("===============");
             try {
                 String[] line = reader.readLine().split(" ", 2);
+                System.out.println("===============");
                 String command = line[0];
 
                 if (command.equals("list")) {
@@ -25,17 +27,11 @@ public class LabelView {
                         System.out.println(label);
                     }
 
-                } else if (command.equals("save")) {
+                } else if (command.equals("create")) {
                     if (line.length != 2) {
                         continue;
                     }
-                    String[] data = line[1].split(" ", 2);
-                    if (data.length != 2) {
-                        continue;
-                    }
-
-                    int id = Integer.parseInt(data[0]);
-                    controller.save(id, data[1]);
+                    controller.save(line[1]);
                     System.out.println("OK");
 
                 } else if (command.equals("update")) {
@@ -78,7 +74,7 @@ public class LabelView {
 
     private void showHelp() {
         System.out.println("Usage:");
-        System.out.println("save <id> <content>");
+        System.out.println("create <content>");
         System.out.println("list");
         System.out.println("update <id> <content>");
         System.out.println("delete <id>");
