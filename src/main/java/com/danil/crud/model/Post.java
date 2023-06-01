@@ -96,7 +96,21 @@ public class Post {
 
     @Override
     public String toString() {
-        return "Post{id=" + id + ", content=" + content + ", created=" + created + ", updated=" + updated + ", labels="
-                + labels + ", status=" + status + "}";
+        StringBuilder builder = new StringBuilder();
+        builder.append("ID: " + this.id + ", ");
+        builder.append("content: " + this.content + ", ");
+        builder.append("created: " + this.created + ", ");
+        builder.append("updated: " + this.updated + ", ");
+        builder.append("status: " + this.status + ", ");
+        builder.append("labels: [ ");
+        for (Label label : labels) {
+            builder.append("{" + label + "}, ");
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    public boolean isDeleted() {
+        return this.status == PostStatus.DELETED;
     }
 }

@@ -14,7 +14,6 @@ import java.util.List;
 
 import com.danil.crud.model.Post;
 import com.danil.crud.model.Writer;
-import com.danil.crud.model.WriterStatus;
 import com.danil.crud.repository.deserializer.WriterDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -123,7 +122,7 @@ public class GsonWriterRepositoryImpl implements WriterRepository {
             return result;
         }
         for (Writer writer : writerList) {
-            if (writer.getStatus() != WriterStatus.DELETED) {
+            if (!writer.isDeleted()) {
                 result.put(writer.getId(), writer);
             }
         }

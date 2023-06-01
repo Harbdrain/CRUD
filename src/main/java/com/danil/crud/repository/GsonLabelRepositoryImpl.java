@@ -11,13 +11,11 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import com.danil.crud.model.Label;
-import com.danil.crud.model.LabelStatus;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class GsonLabelRepositoryImpl implements LabelRepository {
     private static int maxID = 0;
-    private final Gson gson = new Gson();
     private final File file;
 
     public GsonLabelRepositoryImpl(String filename) {
@@ -70,6 +68,7 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
 
         TypeToken<ArrayList<Label>> collectionType = new TypeToken<ArrayList<Label>>() {
         };
+        Gson gson = new Gson();
         ArrayList<Label> labelList = gson.fromJson(contents, collectionType);
         HashMap<Integer, Label> result = new HashMap<>();
         if (labelList == null) {
@@ -91,6 +90,7 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
             return null;
         }
 
+        Gson gson = new Gson();
         TypeToken<ArrayList<Label>> collectionType = new TypeToken<ArrayList<Label>>() {
         };
         ArrayList<Label> labelList = gson.fromJson(contents, collectionType);
@@ -99,7 +99,7 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
             return result;
         }
         for (Label label : labelList) {
-            if (label.getStatus() != LabelStatus.DELETED) {
+            if (!label.isDeleted()) {
                 result.put(label.getId(), label);
             }
         }
@@ -124,6 +124,7 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
             throw new NullPointerException("Tried to save null collection");
         }
 
+        Gson gson = new Gson();
         String json = gson.toJson(collection.values());
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {

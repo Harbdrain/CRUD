@@ -30,9 +30,14 @@ public class Label {
     public void delete() {
         this.status = LabelStatus.DELETED;
     }
+
     @Override
     public String toString() {
-        return "id: " + id + ", name: " + name + ", status: " + status;
+        return "ID: " + this.id + ", " + "name: " + this.name + ", " + "status: " + this.status;
+    }
+
+    public boolean isDeleted() {
+        return this.status == LabelStatus.DELETED;
     }
 
 }

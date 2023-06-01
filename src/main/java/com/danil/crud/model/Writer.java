@@ -62,9 +62,22 @@ public class Writer {
         this.status = WriterStatus.DELETED;
     }
 
+    public boolean isDeleted() {
+        return this.status == WriterStatus.DELETED;
+    }
+
     @Override
     public String toString() {
-        return "Writer{id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", posts=" + posts
-                + ", status=" + status + "}";
+        StringBuilder builder = new StringBuilder();
+        builder.append("ID: " + this.id + ", ");
+        builder.append("firstName: " + this.firstName + ", ");
+        builder.append("lastName: " + this.lastName + ", ");
+        builder.append("status: " + this.status + ", ");
+        builder.append("posts: [ ");
+        for (Post post : posts) {
+            builder.append("{" + post + "}, ");
+        }
+        builder.append("]");
+        return builder.toString();
     }
 }

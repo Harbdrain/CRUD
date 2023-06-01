@@ -14,7 +14,6 @@ import java.util.List;
 
 import com.danil.crud.model.Label;
 import com.danil.crud.model.Post;
-import com.danil.crud.model.PostStatus;
 import com.danil.crud.repository.deserializer.PostDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -123,7 +122,7 @@ public class GsonPostRepositoryImpl implements PostRepository {
             return result;
         }
         for (Post post : postList) {
-            if (post.getStatus() != PostStatus.DELETED) {
+            if (!post.isDeleted()) {
                 result.put(post.getId(), post);
             }
         }
