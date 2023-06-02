@@ -1,10 +1,10 @@
 package com.danil.crud;
 
-import com.danil.crud.view.LabelView;
+import com.danil.crud.view.GeneralView;
 
 public class App {
     public static void main(String[] args) {
-        LabelView labelView = new LabelView();
-        labelView.view();
+        GeneralView view = new GeneralView();
+        view.run();
     }
 }

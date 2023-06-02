@@ -8,22 +8,20 @@ import java.util.List;
 import com.danil.crud.model.Label;
 import com.danil.crud.model.Post;
 import com.danil.crud.model.Writer;
-import com.danil.crud.repository.GsonWriterRepositoryImpl;
 import com.danil.crud.repository.WriterRepository;
+import com.danil.crud.utils.RepositoryUtils;
+import com.danil.crud.utils.ViewUtils;
 import com.danil.crud.view.WriterView;
 
 public class WriterController {
-    WriterRepository writerRepository = new GsonWriterRepositoryImpl("db/writers.json");
-    WriterView writerView = new WriterView();
-
     public void create(String firstName, String lastName) {
         if (firstName.isEmpty() || lastName.isEmpty()) {
             return;
         }
 
-        Writer writer = new Writer(writerRepository.getMaxId(), firstName, lastName);
-        writerRepository.save(writer);
-        writerView.statusOK();
+        Writer writer = new Writer(RepositoryUtils.writerRepository.getMaxId(), firstName, lastName);
+        RepositoryUtils.writerRepository.create(writer);
+        ViewUtils.writerView.statusOK();
     }
 
     public void update(int id, String firstName, String lastName) {
@@ -31,57 +29,70 @@ public class WriterController {
             return;
         }
 
-        Writer writer = writerRepository.getById(id);
+        Writer writer = RepositoryUtils.writerRepository.getById(id);
         if (writer == null || writer.isDeleted()) {
             return;
         }
 
         writer.setFirstName(firstName);
         writer.setLastName(lastName);
-        writerRepository.update(writer);
+        RepositoryUtils.writerRepository.update(writer);
 
-        writerView.statusOK();
+        ViewUtils.writerView.statusOK();
     }
 
-    public void delete(int id) {
+    public void deleteById(int id) {
         if (id < 0) {
             return;
         }
 
-        writerRepository.deleteById(id);
-        writerView.statusOK();
+        RepositoryUtils.writerRepository.deleteById(id);
+        ViewUtils.writerView.statusOK();
     }
 
     public void list() {
-        HashMap<Integer, Writer> writerMap = writerRepository.getAllExceptDeleted();
+        HashMap<Integer, Writer> writerMap = RepositoryUtils.writerRepository.getAll();
         if (writerMap == null) {
             return;
         }
 
-        List<Writer> writerList = new ArrayList<>(writerMap.values());
+        List<Writer> writerList = writerMap.values().stream()
+                .filter(e -> !e.isDeleted())
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+
         for (Writer writer : writerList) {
-            Iterator<Post> postIterator = writer.getPosts().iterator();
-            while (postIterator.hasNext()) {
-                Post post = postIterator.next();
-                if (post.isDeleted()) {
-                    postIterator.remove();
-                }
-            }
+            cleanWriterFromDeletedFields(writer);
         }
 
-        writerView.showList(writerList);
+        ViewUtils.writerView.showList(writerList);
     }
 
-    public void get(int id) {
+    public void getById(int id) {
         if (id < 0) {
             return;
         }
 
-        Writer writer = writerRepository.getById(id);
+        Writer writer = RepositoryUtils.writerRepository.getById(id);
         if (writer == null || writer.isDeleted()) {
             return;
         }
 
+        cleanWriterFromDeletedFields(writer);
+
+        ViewUtils.writerView.show(writer);
+    }
+
+    private void removeDeletedLabelsInPost(Post post) {
+        Iterator<Label> labelIterator = post.getLabels().iterator();
+        while (labelIterator.hasNext()) {
+            Label label = labelIterator.next();
+            if (label.isDeleted()) {
+                labelIterator.remove();
+            }
+        }
+    }
+
+    private void cleanWriterFromDeletedFields(Writer writer) {
         Iterator<Post> postIterator = writer.getPosts().iterator();
         while (postIterator.hasNext()) {
             Post post = postIterator.next();
@@ -90,15 +101,7 @@ public class WriterController {
                 continue;
             }
 
-            Iterator<Label> labelIterator = post.getLabels().iterator();
-            while (labelIterator.hasNext()) {
-                Label label = labelIterator.next();
-                if (label.isDeleted()) {
-                    labelIterator.remove();
-                }
-            }
+            removeDeletedLabelsInPost(post);
         }
-
-        writerView.show(writer);
     }
 }

@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.danil.crud.model.Label;
 import com.danil.crud.model.Post;
 import com.danil.crud.repository.deserializer.PostDeserializer;
+import com.danil.crud.utils.RepositoryUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -31,9 +33,9 @@ public class GsonPostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public void save(Post post) {
+    public void create(Post post) {
         if (post == null) {
-            throw new NullPointerException("Tried to save null post");
+            throw new NullPointerException("Tried to create null post");
         }
 
         HashMap<Integer, Post> collection = getAll();
@@ -42,14 +44,23 @@ public class GsonPostRepositoryImpl implements PostRepository {
         }
         if (!collection.containsKey(post.getId())) {
             collection.put(post.getId(), post);
-            saveAll(collection);
+            createAndUpdateAll(collection);
             setMaxId();
         }
     }
 
-    public void saveAll(HashMap<Integer, Post> collection) {
+    @Override
+    public void createAndUpdateAll(HashMap<Integer, Post> collection) {
         if (collection == null) {
-            throw new NullPointerException("Tried to save null collection");
+            throw new NullPointerException("Tried to create and update null collection");
+        }
+
+        HashMap<Integer, Post> fullCollection = getAll();
+        if (fullCollection == null) {
+            fullCollection = new HashMap<>();
+        }
+        for (Map.Entry<Integer, Post> entry : collection.entrySet()) {
+            fullCollection.put(entry.getKey(), entry.getValue());
         }
 
         GsonBuilder builder = new GsonBuilder();
@@ -65,12 +76,20 @@ public class GsonPostRepositoryImpl implements PostRepository {
         });
         Gson gson = builder.create();
 
-        String json = gson.toJson(collection.values());
+        String json = gson.toJson(fullCollection.values());
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(json);
         } catch (IOException e) {
             System.err.println("Cannot write to " + file.getName() + ": " + e.getMessage());
         }
+
+        HashMap<Integer, Label> labelCollection = new HashMap<>();
+        for (Post post : collection.values()) {
+            for (Label label : post.getLabels()) {
+                labelCollection.put(label.getId(), label);
+            }
+        }
+        RepositoryUtils.labelRepository.createAndUpdateAll(labelCollection);
     }
 
     @Override
@@ -101,35 +120,6 @@ public class GsonPostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public HashMap<Integer, Post> getAllExceptDeleted() {
-        String contents = null;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            contents = reader.readLine();
-        } catch (IOException e) {
-            System.err.println("Cannot read " + file.getName() + ": " + e.getMessage());
-            return null;
-        }
-
-        TypeToken<ArrayList<Post>> collectionType = new TypeToken<ArrayList<Post>>() {
-        };
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(Post.class, new PostDeserializer());
-        Gson gson = builder.create();
-
-        ArrayList<Post> postList = gson.fromJson(contents, collectionType);
-        HashMap<Integer, Post> result = new HashMap<>();
-        if (postList == null) {
-            return result;
-        }
-        for (Post post : postList) {
-            if (!post.isDeleted()) {
-                result.put(post.getId(), post);
-            }
-        }
-        return result;
-    }
-
-    @Override
     public Post getById(Integer id) {
         if (id == null) {
             throw new NullPointerException("Tried to get post with null id");
@@ -153,7 +143,7 @@ public class GsonPostRepositoryImpl implements PostRepository {
         }
         if (collection.containsKey(post.getId())) {
             collection.put(post.getId(), post);
-            saveAll(collection);
+            createAndUpdateAll(collection);
         }
     }
 
@@ -171,7 +161,7 @@ public class GsonPostRepositoryImpl implements PostRepository {
         if (target != null) {
             target.delete();
             collection.put(id, target);
-            saveAll(collection);
+            createAndUpdateAll(collection);
         }
     }
 

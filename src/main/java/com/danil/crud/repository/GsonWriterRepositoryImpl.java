@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.danil.crud.model.Post;
 import com.danil.crud.model.Writer;
 import com.danil.crud.repository.deserializer.WriterDeserializer;
+import com.danil.crud.utils.RepositoryUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -31,9 +33,9 @@ public class GsonWriterRepositoryImpl implements WriterRepository {
     }
 
     @Override
-    public void save(Writer writer) {
+    public void create(Writer writer) {
         if (writer == null) {
-            throw new NullPointerException("Tried to save null writer");
+            throw new NullPointerException("Tried to create null writer");
         }
 
         HashMap<Integer, Writer> collection = getAll();
@@ -42,14 +44,23 @@ public class GsonWriterRepositoryImpl implements WriterRepository {
         }
         if (!collection.containsKey(writer.getId())) {
             collection.put(writer.getId(), writer);
-            saveAll(collection);
+            createAndUpdateAll(collection);
             setMaxId();
         }
     }
 
-    public void saveAll(HashMap<Integer, Writer> collection) {
+    @Override
+    public void createAndUpdateAll(HashMap<Integer, Writer> collection) {
         if (collection == null) {
-            throw new NullPointerException("Tried to save null collection");
+            throw new NullPointerException("Tried to create and update null collection");
+        }
+
+        HashMap<Integer, Writer> fullCollection = getAll();
+        if (fullCollection == null) {
+            fullCollection = new HashMap<>();
+        }
+        for (Map.Entry<Integer, Writer> entry : collection.entrySet()) {
+            fullCollection.put(entry.getKey(), entry.getValue());
         }
 
         GsonBuilder builder = new GsonBuilder();
@@ -65,12 +76,20 @@ public class GsonWriterRepositoryImpl implements WriterRepository {
         });
         Gson gson = builder.create();
 
-        String json = gson.toJson(collection.values());
+        String json = gson.toJson(fullCollection.values());
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(json);
         } catch (IOException e) {
             System.err.println("Cannot write to " + file.getName() + ": " + e.getMessage());
         }
+
+        HashMap<Integer, Post> postCollection = new HashMap<>();
+        for (Writer writer : collection.values()) {
+            for (Post post : writer.getPosts()) {
+                postCollection.put(post.getId(), post);
+            }
+        }
+        RepositoryUtils.postRepository.createAndUpdateAll(postCollection);
     }
 
     @Override
@@ -101,35 +120,6 @@ public class GsonWriterRepositoryImpl implements WriterRepository {
     }
 
     @Override
-    public HashMap<Integer, Writer> getAllExceptDeleted() {
-        String contents = null;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            contents = reader.readLine();
-        } catch (IOException e) {
-            System.err.println("Cannot read " + file.getName() + ": " + e.getMessage());
-            return null;
-        }
-
-        TypeToken<ArrayList<Writer>> collectionType = new TypeToken<ArrayList<Writer>>() {
-        };
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(Post.class, new WriterDeserializer());
-        Gson gson = builder.create();
-
-        ArrayList<Writer> writerList = gson.fromJson(contents, collectionType);
-        HashMap<Integer, Writer> result = new HashMap<>();
-        if (writerList == null) {
-            return result;
-        }
-        for (Writer writer : writerList) {
-            if (!writer.isDeleted()) {
-                result.put(writer.getId(), writer);
-            }
-        }
-        return result;
-    }
-
-    @Override
     public Writer getById(Integer id) {
         if (id == null) {
             throw new NullPointerException("Tried to get writer with null id");
@@ -153,7 +143,7 @@ public class GsonWriterRepositoryImpl implements WriterRepository {
         }
         if (collection.containsKey(writer.getId())) {
             collection.put(writer.getId(), writer);
-            saveAll(collection);
+            createAndUpdateAll(collection);
         }
     }
 
@@ -171,7 +161,7 @@ public class GsonWriterRepositoryImpl implements WriterRepository {
         if (target != null) {
             target.delete();
             collection.put(id, target);
-            saveAll(collection);
+            createAndUpdateAll(collection);
         }
     }
 

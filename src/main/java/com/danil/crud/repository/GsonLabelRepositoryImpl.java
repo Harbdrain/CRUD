@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.danil.crud.model.Label;
 import com.google.gson.Gson;
@@ -24,9 +25,9 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
     }
 
     @Override
-    public void save(Label label) {
+    public void create(Label label) {
         if (label == null) {
-            throw new NullPointerException("Tried to save null label");
+            throw new NullPointerException("Tried to create null label");
         }
 
         HashMap<Integer, Label> collection = getAll();
@@ -35,7 +36,7 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
         }
         if (!collection.containsKey(label.getId())) {
             collection.put(label.getId(), label);
-            saveAll(collection);
+            createAndUpdateAll(collection);
             setMaxId();
         }
     }
@@ -50,10 +51,13 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
         if (collection == null) {
             return;
         }
-        if (collection.containsKey(label.getId())) {
-            collection.put(label.getId(), label);
-            saveAll(collection);
+
+        Label target = collection.get(label.getId());
+        if (target == null) {
+            return;
         }
+        collection.put(label.getId(), label);
+        createAndUpdateAll(collection);
     }
 
     @Override
@@ -74,34 +78,9 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
         if (labelList == null) {
             return result;
         }
+
         for (Label label : labelList) {
             result.put(label.getId(), label);
-        }
-        return result;
-    }
-
-    @Override
-    public HashMap<Integer, Label> getAllExceptDeleted() {
-        String contents = null;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            contents = reader.readLine();
-        } catch (IOException e) {
-            System.err.println("Cannot read " + file.getName() + ": " + e.getMessage());
-            return null;
-        }
-
-        Gson gson = new Gson();
-        TypeToken<ArrayList<Label>> collectionType = new TypeToken<ArrayList<Label>>() {
-        };
-        ArrayList<Label> labelList = gson.fromJson(contents, collectionType);
-        HashMap<Integer, Label> result = new HashMap<>();
-        if (labelList == null) {
-            return result;
-        }
-        for (Label label : labelList) {
-            if (!label.isDeleted()) {
-                result.put(label.getId(), label);
-            }
         }
         return result;
     }
@@ -119,13 +98,21 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
     }
 
     @Override
-    public void saveAll(HashMap<Integer, Label> collection) {
+    public void createAndUpdateAll(HashMap<Integer, Label> collection) {
         if (collection == null) {
-            throw new NullPointerException("Tried to save null collection");
+            throw new NullPointerException("Tried to create null collection");
+        }
+
+        HashMap<Integer, Label> fullCollection = getAll();
+        if (fullCollection == null) {
+            fullCollection = new HashMap<>();
+        }
+        for (Map.Entry<Integer, Label> entry : collection.entrySet()) {
+            fullCollection.put(entry.getKey(), entry.getValue());
         }
 
         Gson gson = new Gson();
-        String json = gson.toJson(collection.values());
+        String json = gson.toJson(fullCollection.values());
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(json);
@@ -148,7 +135,7 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
         if (target != null) {
             target.delete();
             collection.put(id, target);
-            saveAll(collection);
+            createAndUpdateAll(collection);
         }
     }
 
@@ -160,6 +147,7 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
     private void setMaxId() {
         HashMap<Integer, Label> collection = getAll();
         if (collection == null) {
+            maxID = 0;
             return;
         }
         Collection<Label> values = collection.values();

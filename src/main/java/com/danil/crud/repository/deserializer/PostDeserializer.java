@@ -8,8 +8,7 @@ import java.util.List;
 import com.danil.crud.model.Label;
 import com.danil.crud.model.Post;
 import com.danil.crud.model.PostStatus;
-import com.danil.crud.repository.GsonLabelRepositoryImpl;
-import com.danil.crud.repository.LabelRepository;
+import com.danil.crud.utils.RepositoryUtils;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -37,10 +36,9 @@ public class PostDeserializer implements JsonDeserializer<Post> {
         }
         Iterator<JsonElement> iterator = jsonObject.getAsJsonArray("labels").iterator();
         List<Label> labelList = new ArrayList<>();
-        LabelRepository labelRepository = new GsonLabelRepositoryImpl("db/labels.json");
         while (iterator.hasNext()) {
             int labelId = iterator.next().getAsInt();
-            Label label = labelRepository.getById(labelId);
+            Label label = RepositoryUtils.labelRepository.getById(labelId);
             if (label != null) {
                 labelList.add(label);
             }

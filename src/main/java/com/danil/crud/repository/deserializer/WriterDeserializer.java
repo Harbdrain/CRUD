@@ -8,8 +8,7 @@ import java.util.List;
 import com.danil.crud.model.Post;
 import com.danil.crud.model.Writer;
 import com.danil.crud.model.WriterStatus;
-import com.danil.crud.repository.GsonPostRepositoryImpl;
-import com.danil.crud.repository.PostRepository;
+import com.danil.crud.utils.RepositoryUtils;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -32,10 +31,9 @@ public class WriterDeserializer implements JsonDeserializer<Writer> {
         }
         Iterator<JsonElement> iterator = jsonObject.getAsJsonArray("posts").iterator();
         List<Post> labelList = new ArrayList<>();
-        PostRepository postRepository = new GsonPostRepositoryImpl("db/posts.json");
         while (iterator.hasNext()) {
             int postId = iterator.next().getAsInt();
-            Post post = postRepository.getById(postId);
+            Post post = RepositoryUtils.postRepository.getById(postId);
             if (post != null) {
                 labelList.add(post);
             }
