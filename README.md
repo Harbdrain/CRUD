@@ -1,6 +1,6 @@
 Простое CRUD приложение с архитектурой MVC.
 
-Есть три сущности. Writer, Post, Label.
+Есть три сущности: Writer, Post, Label.
 
 База данных - текстовые файлы, содержащие json: db/labels.json, db/posts.json, db/writers.json.
 
@@ -12,7 +12,10 @@ java 8, maven
 `java -cp target/CRUD-1.0-SNAPSHOT.jar:$(cat deps.txt) com.danil.crud.App`
 
 # Использование:
-```label create <content>
+```help
+exit
+
+label create <content>
 label update <label_id> <new_content>
 label delete <label_id>
 label list
