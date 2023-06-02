@@ -4,6 +4,8 @@
 
 База данных - текстовые файлы, содержащие json: db/labels.json, db/posts.json, db/writers.json.
 
+# Зависимости
+java 8, maven
 # Компиляция
 `mvn clean package`
 # Запуск
