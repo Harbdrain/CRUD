@@ -22,7 +22,10 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
 
     public GsonLabelRepositoryImpl(String filename) {
         this.file = new File(filename);
-        this.file.getParentFile().mkdirs();
+        File parent = this.file.getParentFile();
+        if (parent != null) {
+            parent.mkdirs();
+        }
         try {
             this.file.createNewFile();
         } catch (IOException e) {
