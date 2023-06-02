@@ -5,9 +5,9 @@
 База данных - текстовые файлы, содержащие json: db/labels.json, db/posts.json, db/writers.json.
 
 # Компиляция
-mvn clean package
+`mvn clean package`
 # Запуск
-java -cp target/CRUD-1.0-SNAPSHOT.jar:$(cat deps.txt) com.danil.crud.App
+`java -cp target/CRUD-1.0-SNAPSHOT.jar:$(cat deps.txt) com.danil.crud.App`
 
 # Использование:
 ```label create <content>
