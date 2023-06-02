@@ -30,6 +30,12 @@ public class GsonPostRepositoryImpl implements PostRepository {
     public GsonPostRepositoryImpl(String filename) {
         this.file = new File(filename);
         this.file.getParentFile().mkdirs();
+        try {
+            this.file.createNewFile();
+        } catch (IOException e) {
+            System.err.print("Cannot create " + RepositoryUtils.postRepositoryFilename + " file! ");
+            System.err.println(e);
+        }
         setMaxId();
     }
 

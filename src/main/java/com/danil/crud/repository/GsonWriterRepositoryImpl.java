@@ -30,6 +30,12 @@ public class GsonWriterRepositoryImpl implements WriterRepository {
     public GsonWriterRepositoryImpl(String filename) {
         this.file = new File(filename);
         this.file.getParentFile().mkdirs();
+        try {
+            this.file.createNewFile();
+        } catch (IOException e) {
+            System.err.print("Cannot create " + RepositoryUtils.writerRepositoryFilename + " file! ");
+            System.err.println(e);
+        }
         setMaxId();
     }
 

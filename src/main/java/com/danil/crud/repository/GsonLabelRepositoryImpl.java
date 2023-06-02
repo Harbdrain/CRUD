@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.danil.crud.model.Label;
+import com.danil.crud.utils.RepositoryUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -22,6 +23,12 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
     public GsonLabelRepositoryImpl(String filename) {
         this.file = new File(filename);
         this.file.getParentFile().mkdirs();
+        try {
+            this.file.createNewFile();
+        } catch (IOException e) {
+            System.err.print("Cannot create " + RepositoryUtils.labelRepositoryFilename + " file! ");
+            System.err.println(e);
+        }
         setMaxId();
     }
 
