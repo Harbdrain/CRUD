@@ -29,6 +29,7 @@ public class GsonPostRepositoryImpl implements PostRepository {
 
     public GsonPostRepositoryImpl(String filename) {
         this.file = new File(filename);
+        this.file.getParentFile().mkdirs();
         setMaxId();
     }
 

@@ -21,6 +21,7 @@ public class GsonLabelRepositoryImpl implements LabelRepository {
 
     public GsonLabelRepositoryImpl(String filename) {
         this.file = new File(filename);
+        this.file.getParentFile().mkdirs();
         setMaxId();
     }
 
