@@ -12,7 +12,8 @@ java 8, maven
 `java -cp target/CRUD-1.0-SNAPSHOT.jar:$(cat deps.txt) com.danil.crud.App`
 
 # Использование:
-```help
+```
+help
 exit
 
 label create <content>
