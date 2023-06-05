@@ -1,65 +1,54 @@
 package com.danil.crud.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import com.danil.crud.model.Label;
-import com.danil.crud.utils.RepositoryUtils;
-import com.danil.crud.utils.ViewUtils;
+import com.danil.crud.model.LabelStatus;
+import com.danil.crud.repository.LabelRepository;
+import com.danil.crud.repository.gson.GsonLabelRepositoryImpl;
 
 public class LabelController {
-    public void create(String content) {
-        if (content.isEmpty()) {
-            return;
+    private final LabelRepository labelRepository = new GsonLabelRepositoryImpl();
+
+    public Label create(String name) {
+        if (name.isEmpty()) {
+            return null;
         }
-        RepositoryUtils.labelRepository.create(new Label(RepositoryUtils.labelRepository.getMaxId(), content));
-        ViewUtils.labelView.statusOK();
+        Label label = new Label();
+        label.setName(name);
+        label.setStatus(LabelStatus.ACTIVE);
+        return labelRepository.create(label);
     }
 
-    public void update(int id, String content) {
+    public Label update(int id, String content) {
         if (id < 0 || content.isEmpty()) {
-            return;
+            return null;
         }
 
-        Label label = RepositoryUtils.labelRepository.getById(id);
-        if (label == null || label.isDeleted()) {
-            return;
+        Label label = labelRepository.getById(id);
+        if (label == null) {
+            return null;
         }
 
         label.setName(content);
-        RepositoryUtils.labelRepository.update(label);
-
-        ViewUtils.labelView.statusOK();
+        return labelRepository.update(label);
     }
 
     public void deleteById(int id) {
         if (id < 0) {
             return;
         }
-        RepositoryUtils.labelRepository.deleteById(id);
-        ViewUtils.labelView.statusOK();
+        labelRepository.deleteById(id);
     }
 
-    public void list() {
-        HashMap<Integer, Label> labelMap = RepositoryUtils.labelRepository.getAll();
-        if (labelMap == null) {
-            return;
-        }
-        List<Label> labelList = labelMap.values().stream()
-                .filter(e -> !e.isDeleted())
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        ViewUtils.labelView.showList(labelList);
+    public List<Label> list() {
+        return labelRepository.getAll();
     }
 
-    public void getById(int id) {
+    public Label getById(int id) {
         if (id < 0) {
-            return;
+            return null;
         }
-        Label label = RepositoryUtils.labelRepository.getById(id);
-        if (label == null || label.isDeleted()) {
-            return;
-        }
-        ViewUtils.labelView.show(label);
+        return labelRepository.getById(id);
     }
 }

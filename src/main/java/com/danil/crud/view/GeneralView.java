@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import com.danil.crud.utils.ViewUtils;
-
 public class GeneralView {
+    LabelView labelView = new LabelView();
+    PostView postView = new PostView();
+    WriterView writerView = new WriterView();
+
     public void processInput(String input) {
         if (input.equals("help")) {
             showHelp();
@@ -24,11 +26,11 @@ public class GeneralView {
 
         String command = data[0];
         if (command.equals("label")) {
-            ViewUtils.labelView.processInput(data[1]);
+            labelView.processInput(data[1]);
         } else if (command.equals("post")) {
-            ViewUtils.postView.processInput(data[1]);
+            postView.processInput(data[1]);
         } else if (command.equals("writer")) {
-            ViewUtils.writerView.processInput(data[1]);
+            writerView.processInput(data[1]);
         } else {
             System.out.println("Bad input. Type 'help' for help.");
         }

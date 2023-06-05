@@ -2,16 +2,18 @@ package com.danil.crud.view;
 
 import java.util.List;
 
+import com.danil.crud.controller.PostController;
 import com.danil.crud.model.Label;
 import com.danil.crud.model.Post;
-import com.danil.crud.utils.ControllerUtils;
 
 public class PostView {
-    public void statusOK() {
+    PostController postController = new PostController();
+
+    private void statusOK() {
         System.out.println("OK");
     }
 
-    public void showList(List<Post> list) {
+    private void showList(List<Post> list) {
         for (Post post : list) {
             System.out.print("ID: " + post.getId() + ", " +
                     "content: " + post.getContent() + ", " +
@@ -26,7 +28,7 @@ public class PostView {
         }
     }
 
-    public void show(Post post) {
+    private void show(Post post) {
         System.out.println(post);
     }
 
@@ -48,7 +50,10 @@ public class PostView {
 
                 int writerId = Integer.parseInt(data[0]);
                 String content = data[1];
-                ControllerUtils.postController.create(writerId, content);
+                Post result = postController.create(writerId, content);
+                if (result != null) {
+                    statusOK();
+                }
             }
 
             if (command.equals("update")) {
@@ -64,7 +69,10 @@ public class PostView {
 
                 int id = Integer.parseInt(data[0]);
                 String content = data[1];
-                ControllerUtils.postController.update(id, content);
+                Post result = postController.update(id, content);
+                if (result != null) {
+                    statusOK();
+                }
             }
 
             if (command.equals("addlabel")) {
@@ -80,7 +88,10 @@ public class PostView {
 
                 int id = Integer.parseInt(data[0]);
                 int labelId = Integer.parseInt(data[1]);
-                ControllerUtils.postController.addLabel(id, labelId);
+                Post result = postController.addLabel(id, labelId);
+                if (result != null) {
+                    statusOK();
+                }
             }
 
             if (command.equals("delete")) {
@@ -90,7 +101,7 @@ public class PostView {
                 }
 
                 int id = Integer.parseInt(data[1]);
-                ControllerUtils.postController.deleteById(id);
+                postController.deleteById(id);
             }
 
             if (command.equals("dellabel")) {
@@ -106,7 +117,10 @@ public class PostView {
 
                 int id = Integer.parseInt(data[0]);
                 int labelId = Integer.parseInt(data[1]);
-                ControllerUtils.postController.dellabel(id, labelId);
+                Post result = postController.dellabel(id, labelId);
+                if (result != null) {
+                    statusOK();
+                }
             }
 
             if (command.equals("list")) {
@@ -115,7 +129,8 @@ public class PostView {
                     return;
                 }
 
-                ControllerUtils.postController.list();
+                List<Post> result = postController.list();
+                showList(result);
             }
 
             if (command.equals("get")) {
@@ -125,7 +140,10 @@ public class PostView {
                 }
 
                 int id = Integer.parseInt(data[1]);
-                ControllerUtils.postController.getById(id);
+                Post result = postController.getById(id);
+                if (result != null) {
+                    show(result);
+                }
             }
         } catch (NumberFormatException e) {
             System.out.println("Bad input. Type 'help' for help.");

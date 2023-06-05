@@ -1,44 +1,42 @@
 package com.danil.crud.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
-import com.danil.crud.model.Label;
-import com.danil.crud.model.Post;
 import com.danil.crud.model.Writer;
+import com.danil.crud.model.WriterStatus;
 import com.danil.crud.repository.WriterRepository;
-import com.danil.crud.utils.RepositoryUtils;
-import com.danil.crud.utils.ViewUtils;
-import com.danil.crud.view.WriterView;
+import com.danil.crud.repository.gson.GsonWriterRepositoryImpl;
 
 public class WriterController {
-    public void create(String firstName, String lastName) {
+    private final WriterRepository writerRepository = new GsonWriterRepositoryImpl();
+
+    public Writer create(String firstName, String lastName) {
         if (firstName.isEmpty() || lastName.isEmpty()) {
-            return;
+            return null;
         }
 
-        Writer writer = new Writer(RepositoryUtils.writerRepository.getMaxId(), firstName, lastName);
-        RepositoryUtils.writerRepository.create(writer);
-        ViewUtils.writerView.statusOK();
+        Writer writer = new Writer();
+        writer.setFirstName(firstName);
+        writer.setLastName(lastName);
+        writer.setStatus(WriterStatus.ACTIVE);
+        writer.setPosts(new ArrayList<>());
+        return writerRepository.create(writer);
     }
 
-    public void update(int id, String firstName, String lastName) {
+    public Writer update(int id, String firstName, String lastName) {
         if (id < 0 || firstName.isEmpty() || lastName.isEmpty()) {
-            return;
+            return null;
         }
 
-        Writer writer = RepositoryUtils.writerRepository.getById(id);
-        if (writer == null || writer.isDeleted()) {
-            return;
+        Writer writer = writerRepository.getById(id);
+        if (writer == null) {
+            return null;
         }
 
         writer.setFirstName(firstName);
         writer.setLastName(lastName);
-        RepositoryUtils.writerRepository.update(writer);
-
-        ViewUtils.writerView.statusOK();
+        return writerRepository.update(writer);
     }
 
     public void deleteById(int id) {
@@ -46,62 +44,18 @@ public class WriterController {
             return;
         }
 
-        RepositoryUtils.writerRepository.deleteById(id);
-        ViewUtils.writerView.statusOK();
+        writerRepository.deleteById(id);
     }
 
-    public void list() {
-        HashMap<Integer, Writer> writerMap = RepositoryUtils.writerRepository.getAll();
-        if (writerMap == null) {
-            return;
-        }
-
-        List<Writer> writerList = writerMap.values().stream()
-                .filter(e -> !e.isDeleted())
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-
-        for (Writer writer : writerList) {
-            cleanWriterFromDeletedFields(writer);
-        }
-
-        ViewUtils.writerView.showList(writerList);
+    public List<Writer> list() {
+        return writerRepository.getAll();
     }
 
-    public void getById(int id) {
+    public Writer getById(int id) {
         if (id < 0) {
-            return;
+            return null;
         }
 
-        Writer writer = RepositoryUtils.writerRepository.getById(id);
-        if (writer == null || writer.isDeleted()) {
-            return;
-        }
-
-        cleanWriterFromDeletedFields(writer);
-
-        ViewUtils.writerView.show(writer);
-    }
-
-    private void removeDeletedLabelsInPost(Post post) {
-        Iterator<Label> labelIterator = post.getLabels().iterator();
-        while (labelIterator.hasNext()) {
-            Label label = labelIterator.next();
-            if (label.isDeleted()) {
-                labelIterator.remove();
-            }
-        }
-    }
-
-    private void cleanWriterFromDeletedFields(Writer writer) {
-        Iterator<Post> postIterator = writer.getPosts().iterator();
-        while (postIterator.hasNext()) {
-            Post post = postIterator.next();
-            if (post.isDeleted()) {
-                postIterator.remove();
-                continue;
-            }
-
-            removeDeletedLabelsInPost(post);
-        }
+        return writerRepository.getById(id);
     }
 }

@@ -2,21 +2,23 @@ package com.danil.crud.view;
 
 import java.util.List;
 
+import com.danil.crud.controller.LabelController;
 import com.danil.crud.model.Label;
-import com.danil.crud.utils.ControllerUtils;
 
 public class LabelView {
-    public void statusOK() {
+    LabelController labelController = new LabelController();
+
+    private void statusOK() {
         System.out.println("OK");
     }
 
-    public void showList(List<Label> list) {
+    private void showList(List<Label> list) {
         for (Label label : list) {
             System.out.println(label);
         }
     }
 
-    public void show(Label label) {
+    private void show(Label label) {
         System.out.println(label);
     }
 
@@ -32,7 +34,10 @@ public class LabelView {
                 }
 
                 String content = data[1];
-                ControllerUtils.labelController.create(content);
+                Label result = labelController.create(content);
+                if (result != null) {
+                    statusOK();
+                }
             }
 
             if (command.equals("update")) {
@@ -48,7 +53,10 @@ public class LabelView {
 
                 int id = Integer.parseInt(data[0]);
                 String content = data[1];
-                ControllerUtils.labelController.update(id, content);
+                Label result = labelController.update(id, content);
+                if (result != null) {
+                    statusOK();
+                }
             }
 
             if (command.equals("delete")) {
@@ -58,7 +66,8 @@ public class LabelView {
                 }
 
                 int id = Integer.parseInt(data[1]);
-                ControllerUtils.labelController.deleteById(id);
+                labelController.deleteById(id);
+                statusOK();
             }
 
             if (command.equals("list")) {
@@ -66,7 +75,8 @@ public class LabelView {
                     System.out.println("Bad input. Type 'help' for help.");
                     return;
                 }
-                ControllerUtils.labelController.list();
+                List<Label> result = labelController.list();
+                showList(result);
             }
 
             if (command.equals("get")) {
@@ -75,7 +85,10 @@ public class LabelView {
                     return;
                 }
                 int id = Integer.parseInt(data[1]);
-                ControllerUtils.labelController.getById(id);
+                Label result = labelController.getById(id);
+                if (result != null) {
+                    show(result);
+                }
             }
         } catch (NumberFormatException e) {
             System.out.println("Bad input. Type 'help' for help.");

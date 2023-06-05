@@ -1,25 +1,20 @@
 package com.danil.crud.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Writer {
-    private final int id;
+    private Integer id;
     private String firstName;
     private String lastName;
     List<Post> posts;
     WriterStatus status;
 
-    public Writer(int id, String firstName, String lastName) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        posts = new ArrayList<>();
-        this.status = WriterStatus.ACTIVE;
+    public Integer getId() {
+        return id;
     }
 
-    public int getId() {
-        return id;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getFirstName() {

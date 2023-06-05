@@ -1,18 +1,16 @@
 package com.danil.crud.model;
 
 public class Label {
-    private final int id;
+    private Integer id;
     private String name;
     private LabelStatus status;
 
-    public Label(int id, String name) {
-        this.name = name;
-        this.id = id;
-        this.status = LabelStatus.ACTIVE;
+    public Integer getId() {
+        return id;
     }
 
-    public int getId() {
-        return id;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -27,17 +25,20 @@ public class Label {
         return this.status;
     }
 
-    public void delete() {
-        this.status = LabelStatus.DELETED;
+    public void setStatus(LabelStatus status) {
+        this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return "ID: " + this.id + ", " + "name: " + this.name + ", " + "status: " + this.status;
+    public void delete() {
+        this.status = LabelStatus.DELETED;
     }
 
     public boolean isDeleted() {
         return this.status == LabelStatus.DELETED;
     }
 
+    @Override
+    public String toString() {
+        return "ID: " + this.id + ", " + "name: " + this.name + ", " + "status: " + this.status;
+    }
 }

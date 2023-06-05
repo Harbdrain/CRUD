@@ -1,17 +1,15 @@
 package com.danil.crud.repository;
 
-import java.util.HashMap;
+import java.util.List;
 
 public interface GenericRepository<T, ID> {
-    void create(T t);
-    void createAndUpdateAll(HashMap<ID, T> map);
+    T create(T t);
 
-    HashMap<ID, T> getAll();
+    List<T> getAll();
+
     T getById(ID id);
 
-    void update(T t);
+    T update(T t);
 
     void deleteById(ID id);
-
-    int getMaxId();
 }

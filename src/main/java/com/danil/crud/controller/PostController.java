@@ -1,138 +1,115 @@
 package com.danil.crud.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
 import com.danil.crud.model.Label;
 import com.danil.crud.model.Post;
+import com.danil.crud.model.PostStatus;
 import com.danil.crud.model.Writer;
-import com.danil.crud.utils.RepositoryUtils;
-import com.danil.crud.utils.ViewUtils;
+import com.danil.crud.repository.LabelRepository;
+import com.danil.crud.repository.PostRepository;
+import com.danil.crud.repository.WriterRepository;
+import com.danil.crud.repository.gson.GsonLabelRepositoryImpl;
+import com.danil.crud.repository.gson.GsonPostRepositoryImpl;
+import com.danil.crud.repository.gson.GsonWriterRepositoryImpl;
 
 public class PostController {
-    public void create(int writerId, String content) {
+    private final LabelRepository labelRepository = new GsonLabelRepositoryImpl();
+    private final PostRepository postRepository = new GsonPostRepositoryImpl();
+    private final WriterRepository writerRepository = new GsonWriterRepositoryImpl();
+
+    public Post create(int writerId, String content) {
         if (writerId < 0 || content.isEmpty()) {
-            return;
+            return null;
         }
 
-        Writer writer = RepositoryUtils.writerRepository.getById(writerId);
+        Writer writer = writerRepository.getById(writerId);
         if (writer == null || writer.isDeleted()) {
-            return;
+            return null;
         }
-        Post post = new Post(RepositoryUtils.postRepository.getMaxId(), content);
-        RepositoryUtils.postRepository.create(post);
+
+        Post post = new Post();
+        post.setContent(content);
+        Long time = System.currentTimeMillis() / 1000L;
+        post.setCreated(time);
+        post.setUpdated(time);
+        post.setStatus(PostStatus.ACTIVE);
+        post.setLabels(new ArrayList<>());
+        Post result = postRepository.create(post);
 
         writer.addPost(post);
-        RepositoryUtils.writerRepository.update(writer);
-        ViewUtils.postView.statusOK();
+        writerRepository.update(writer);
+
+        return result;
     }
 
-    public void update(int postId, String content) {
+    public Post update(int postId, String content) {
         if (postId < 0 || content.isEmpty()) {
-            return;
+            return null;
         }
 
-        Post post = RepositoryUtils.postRepository.getById(postId);
-        if (post == null || post.isDeleted()) {
-            return;
+        Post post = postRepository.getById(postId);
+        if (post == null) {
+            return null;
         }
 
+        Long time = System.currentTimeMillis() / 1000L;
         post.setContent(content);
-        RepositoryUtils.postRepository.update(post);
-
-        ViewUtils.postView.statusOK();
+        post.setStatus(PostStatus.UNDER_REVIEW);
+        post.setUpdated(time);
+        return postRepository.update(post);
     }
 
-    public void addLabel(int postId, int labelId) {
+    public Post addLabel(int postId, int labelId) {
         if (postId < 0 || labelId < 0) {
-            return;
+            return null;
         }
 
-        Post post = RepositoryUtils.postRepository.getById(postId);
-        if (post == null || post.isDeleted()) {
-            return;
+        Post post = postRepository.getById(postId);
+        if (post == null) {
+            return null;
         }
 
-        Label label = RepositoryUtils.labelRepository.getById(labelId);
-        if (label == null || label.isDeleted()) {
-            return;
+        Label label = labelRepository.getById(labelId);
+        if (label == null) {
+            return null;
         }
 
         post.addLabel(label);
-        RepositoryUtils.postRepository.update(post);
-        ViewUtils.postView.statusOK();
+        return postRepository.update(post);
     }
 
     public void deleteById(int id) {
         if (id < 0) {
             return;
         }
-        RepositoryUtils.postRepository.deleteById(id);
-        ViewUtils.postView.statusOK();
+        postRepository.deleteById(id);
     }
 
-    public void dellabel(int postId, int labelId) {
+    public Post dellabel(int postId, int labelId) {
         if (postId < 0 || labelId < 0) {
-            return;
+            return null;
         }
 
-        Post post = RepositoryUtils.postRepository.getById(postId);
-        if (post == null || post.isDeleted()) {
-            return;
-        }
-
-        Iterator<Label> labelIterator = post.getLabels().iterator();
-        while (labelIterator.hasNext()) {
-            Label label = labelIterator.next();
-            if (label.getId() == labelId) {
-                labelIterator.remove();
-                RepositoryUtils.postRepository.update(post);
-                ViewUtils.postView.statusOK();
-                break;
-            }
-        }
-    }
-
-    public void list() {
-        HashMap<Integer, Post> postMap = RepositoryUtils.postRepository.getAll();
-        if (postMap == null) {
-            return;
-        }
-
-        List<Post> postList = postMap.values().stream()
-                .filter(e -> !e.isDeleted())
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        for (Post post : postList) {
-            cleanPostFromDeletedFields(post);
-        }
-
-        ViewUtils.postView.showList(postList);
-    }
-
-    public void getById(int id) {
-        if (id < 0) {
-            return;
-        }
-
-        Post post = RepositoryUtils.postRepository.getById(id);
+        Post post = postRepository.getById(postId);
         if (post == null) {
-            return;
+            return null;
         }
 
-        cleanPostFromDeletedFields(post);
-
-        ViewUtils.postView.show(post);
+        post.getLabels().removeIf(e -> e.getId() == labelId);
+        return postRepository.update(post);
     }
 
-    private void cleanPostFromDeletedFields(Post post) {
-        Iterator<Label> labelIterator = post.getLabels().iterator();
-        while (labelIterator.hasNext()) {
-            Label label = labelIterator.next();
-            if (label.isDeleted()) {
-                labelIterator.remove();
-            }
+    public List<Post> list() {
+        return postRepository.getAll();
+    }
+
+    public Post getById(int id) {
+        if (id < 0) {
+            return null;
         }
+
+        return postRepository.getById(id);
     }
 }
